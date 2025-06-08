@@ -62,7 +62,7 @@ public:
     const double scale = 0.5);
 
 private:
-  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_pub_;
+  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_array_pub_;
   rclcpp::Node::SharedPtr node_;
 };
 
