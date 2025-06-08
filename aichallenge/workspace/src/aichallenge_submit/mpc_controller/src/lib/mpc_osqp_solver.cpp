@@ -78,8 +78,10 @@ Eigen::VectorXd MPCOSQPSolver::solve(const Eigen::VectorXd& x0, const std::vecto
     
     // 入力の係数
     Su.block(row, col, nx_, nu_) = B_;
-    for (int j = 0; j < i; ++j) {
-      Su.block(row, j * nu_, nx_, nu_) = A_ * Su.block((i - 1) * nx_, j * nu_, nx_, nu_);
+    if (i > 0) {
+      for (int j = 0; j < i; ++j) {
+        Su.block(row, j * nu_, nx_, nu_) = A_ * Su.block((i - 1) * nx_, j * nu_, nx_, nu_);
+      }
     }
   }
 

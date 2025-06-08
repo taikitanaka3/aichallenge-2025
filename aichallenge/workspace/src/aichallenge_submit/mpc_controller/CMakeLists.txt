@@ -17,11 +17,7 @@ ament_auto_add_library(mpc_controller_lib
   src/lib/visualization.cpp
 )
 
-ament_auto_add_executable(mpc_controller_node
-  src/mpc_controller_node.cpp
-)
-target_link_libraries(mpc_controller_node mpc_controller_lib)
-
+# テストのみをビルド
 ament_auto_add_gtest(test_mpc_osqp_solver
   test/test_mpc_osqp_solver.cpp
 )
