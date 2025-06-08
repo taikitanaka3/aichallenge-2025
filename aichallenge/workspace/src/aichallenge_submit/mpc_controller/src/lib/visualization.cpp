@@ -92,32 +92,32 @@ visualization_msgs::msg::Marker Visualization::createVehicleBoxMarker(
 }
 
 visualization_msgs::msg::Marker Visualization::createTrajectoryMarker(
+  const std::string& ns,
+  int id,
+  double r, double g, double b, double a,
   const std::vector<double>& x,
-  const std::vector<double>& y,
-  const double scale,
-  const double r,
-  const double g,
-  const double b) {
-  
+  const std::vector<double>& y)
+{
   visualization_msgs::msg::Marker marker;
   marker.header.frame_id = "map";
   marker.header.stamp = node_->now();
-  marker.ns = "trajectory";
-  marker.id = 0;
+  marker.ns = ns;
+  marker.id = id;
   marker.type = visualization_msgs::msg::Marker::LINE_STRIP;
   marker.action = visualization_msgs::msg::Marker::ADD;
-  marker.scale.x = scale;  // 線の太さ
+  marker.scale.x = 0.02;  // 線の太さをさらに細く
   marker.color.r = r;
   marker.color.g = g;
   marker.color.b = b;
-  marker.color.a = 1.0;
+  marker.color.a = a;
 
+  // 点を追加
   for (size_t i = 0; i < x.size(); ++i) {
-    geometry_msgs::msg::Point p;
-    p.x = x[i];
-    p.y = y[i];
-    p.z = 0.0;
-    marker.points.push_back(p);
+    geometry_msgs::msg::Point point;
+    point.x = x[i];
+    point.y = y[i];
+    point.z = 0.0;
+    marker.points.push_back(point);
   }
 
   return marker;
@@ -155,7 +155,7 @@ visualization_msgs::msg::Marker Visualization::createControlInputTextMarker(
   return marker;
 }
 
-void Visualization::publishTrajectory(
+void Visualization::publishPredictedTrajectory(
   const std::vector<double>& predicted_x,
   const std::vector<double>& predicted_y,
   const std::vector<double>& predicted_yaw,
@@ -163,56 +163,16 @@ void Visualization::publishTrajectory(
   double current_y,
   double current_yaw,
   double current_accel,
-  double current_steer) {
-  
+  double current_steer)
+{
   visualization_msgs::msg::MarkerArray marker_array;
 
   // 予測軌跡のマーカー（赤・細く・半透明）
-  visualization_msgs::msg::Marker trajectory_marker;
-  trajectory_marker.header.frame_id = "map";
-  trajectory_marker.header.stamp = node_->now();
-  trajectory_marker.ns = "predicted_trajectory";
-  trajectory_marker.id = 0;
-  trajectory_marker.type = visualization_msgs::msg::Marker::LINE_STRIP;
-  trajectory_marker.action = visualization_msgs::msg::Marker::ADD;
-  trajectory_marker.scale.x = 0.02;  // 線の太さをさらに細く
-  trajectory_marker.color.r = 1.0;
-  trajectory_marker.color.g = 0.0;
-  trajectory_marker.color.b = 0.0;
-  trajectory_marker.color.a = 0.8;   // 半透明
-
-  for (size_t i = 0; i < predicted_x.size(); ++i) {
-    geometry_msgs::msg::Point point;
-    point.x = predicted_x[i];
-    point.y = predicted_y[i];
-    point.z = 0.0;
-    trajectory_marker.points.push_back(point);
-  }
+  auto trajectory_marker = createTrajectoryMarker(
+    "predicted_trajectory", 0,
+    1.0, 0.0, 0.0, 0.8,  // 赤色・半透明
+    predicted_x, predicted_y);
   marker_array.markers.push_back(trajectory_marker);
-
-  // 参照軌跡のマーカー（緑・細く・半透明）
-  visualization_msgs::msg::Marker reference_marker;
-  reference_marker.header.frame_id = "map";
-  reference_marker.header.stamp = node_->now();
-  reference_marker.ns = "reference_trajectory";
-  reference_marker.id = 1;
-  reference_marker.type = visualization_msgs::msg::Marker::LINE_STRIP;
-  reference_marker.action = visualization_msgs::msg::Marker::ADD;
-  reference_marker.scale.x = 0.02;  // 線の太さをさらに細く
-  reference_marker.color.r = 0.0;
-  reference_marker.color.g = 1.0;
-  reference_marker.color.b = 0.0;
-  reference_marker.color.a = 0.8;   // 半透明
-
-  // 参照軌跡の点を追加（直線の場合）
-  for (double x = 0.0; x <= 10.0; x += 0.1) {
-    geometry_msgs::msg::Point point;
-    point.x = x;
-    point.y = 0.0;
-    point.z = 0.0;
-    reference_marker.points.push_back(point);
-  }
-  marker_array.markers.push_back(reference_marker);
 
   // 車両のマーカー（青矢印）
   visualization_msgs::msg::Marker vehicle_marker;
@@ -240,6 +200,23 @@ void Visualization::publishTrajectory(
   vehicle_marker.pose.orientation = tf2::toMsg(q);
 
   marker_array.markers.push_back(vehicle_marker);
+
+  // マーカー配列をパブリッシュ
+  marker_array_pub_->publish(marker_array);
+}
+
+void Visualization::publishReferenceTrajectory(
+  const std::vector<double>& reference_x,
+  const std::vector<double>& reference_y)
+{
+  visualization_msgs::msg::MarkerArray marker_array;
+
+  // 参照軌跡のマーカー（緑・細く・半透明）
+  auto reference_marker = createTrajectoryMarker(
+    "reference_trajectory", 1,
+    0.0, 1.0, 0.0, 0.8,  // 緑色・半透明
+    reference_x, reference_y);
+  marker_array.markers.push_back(reference_marker);
 
   // マーカー配列をパブリッシュ
   marker_array_pub_->publish(marker_array);

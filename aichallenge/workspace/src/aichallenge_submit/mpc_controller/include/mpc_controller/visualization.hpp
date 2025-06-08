@@ -5,6 +5,7 @@
 #include <visualization_msgs/msg/marker_array.hpp>
 #include <geometry_msgs/msg/point.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <string>
 
 namespace mpc_controller {
 
@@ -13,15 +14,15 @@ public:
   explicit Visualization(rclcpp::Node::SharedPtr node);
 
   // 予測軌跡の可視化
-  void publishTrajectory(
+  void publishPredictedTrajectory(
     const std::vector<double>& predicted_x,
     const std::vector<double>& predicted_y,
     const std::vector<double>& predicted_yaw,
-    const double current_x,
-    const double current_y,
-    const double current_yaw,
-    const double acceleration,
-    const double steering_angle);
+    double current_x,
+    double current_y,
+    double current_yaw,
+    double current_accel,
+    double current_steer);
 
   // 車両の可視化（矢印）
   visualization_msgs::msg::Marker createVehicleMarker(
@@ -46,12 +47,11 @@ public:
 
   // 軌跡の可視化（線）
   visualization_msgs::msg::Marker createTrajectoryMarker(
+    const std::string& ns,
+    int id,
+    double r, double g, double b, double a,
     const std::vector<double>& x,
-    const std::vector<double>& y,
-    const double scale = 0.1,
-    const double r = 0.0,
-    const double g = 0.0,
-    const double b = 1.0);
+    const std::vector<double>& y);
 
   // 制御入力のテキスト表示
   visualization_msgs::msg::Marker createControlInputTextMarker(
@@ -60,6 +60,10 @@ public:
     const double acceleration,
     const double steering_angle,
     const double scale = 0.5);
+
+  void publishReferenceTrajectory(
+    const std::vector<double>& reference_x,
+    const std::vector<double>& reference_y);
 
 private:
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_array_pub_;
