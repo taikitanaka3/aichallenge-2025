@@ -1,0 +1,23 @@
+/**:
+  ros__parameters:
+    # 車両パラメータ
+    wheel_base: 2.7  # ホイールベース [m]
+    steer_lim: 0.5   # ステアリング角制限 [rad]
+    steer_rate_lim: 0.2  # ステアリング角速度制限 [rad/s]
+
+    # MPCパラメータ
+    prediction_horizon: 50  # 予測ホライズン
+    prediction_dt: 0.1      # 予測時間ステップ [s]
+    q_weight: [1.0, 1.0, 1.0, 1.0]  # 状態の重み [x, y, yaw, v]
+    r_weight: [1.0, 1.0]    # 入力の重み [steer, accel]
+
+    # 制約条件
+    steer_min: -0.5   # 最小ステアリング角 [rad]
+    steer_max: 0.5    # 最大ステアリング角 [rad]
+    steer_rate_min: -0.2  # 最小ステアリング角速度 [rad/s]
+    steer_rate_max: 0.2   # 最大ステアリング角速度 [rad/s]
+    accel_min: -3.0   # 最小加速度 [m/s^2]
+    accel_max: 3.0    # 最大加速度 [m/s^2]
+
+    # その他のパラメータ
+    debug_mode: false  # デバッグモード 

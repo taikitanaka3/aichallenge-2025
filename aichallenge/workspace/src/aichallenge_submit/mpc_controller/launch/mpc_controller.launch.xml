@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="input/reference_trajectory" default="/planning/scenario_planning/trajectory"/>
+  <arg name="input/current_odometry" default="/localization/kinematic_state"/>
+  <arg name="output/control_cmd" default="/control/command/control_cmd"/>
+  <arg name="param_path" default="$(find-pkg-share mpc_controller)/config/mpc_controller.param.yaml"/>
+
+  <node pkg="mpc_controller" exec="mpc_controller_node" name="mpc_controller" output="screen">
+    <remap from="input/reference_trajectory" to="$(var input/reference_trajectory)"/>
+    <remap from="input/current_odometry" to="$(var input/current_odometry)"/>
+    <remap from="output/control_cmd" to="$(var output/control_cmd)"/>
+    <param from="$(var param_path)"/>
+  </node>
+</launch> 
