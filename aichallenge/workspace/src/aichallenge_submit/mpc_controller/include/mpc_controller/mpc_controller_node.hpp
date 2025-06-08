@@ -20,6 +20,7 @@
 #include <nav_msgs/msg/odometry.hpp>
 #include <autoware_auto_control_msgs/msg/ackermann_control_command.hpp>
 #include "mpc_controller/vehicle_model.hpp"
+#include "mpc_controller/visualization.hpp"
 #include <visualization_msgs/msg/marker_array.hpp>
 
 namespace mpc_controller
@@ -45,6 +46,9 @@ private:
 
   // 車両モデル
   std::unique_ptr<LinearVehicleModel> vehicle_model_;
+
+  // 可視化
+  std::shared_ptr<Visualization> visualization_;
 
   // 最新のメッセージ
   autoware_auto_planning_msgs::msg::Trajectory::SharedPtr current_trajectory_;

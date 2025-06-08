@@ -12,23 +12,30 @@
 // limitations under the License.
 
 #include <gtest/gtest.h>
-#include "mpc_controller/mpc_osqp_solver.hpp"
-#include "mpc_controller/visualization.hpp"
-#include <rclcpp/rclcpp.hpp>
+#include <memory>
+#include <vector>
 #include <chrono>
 #include <thread>
+#include <rclcpp/rclcpp.hpp>
+#include "mpc_controller/mpc_osqp_solver.hpp"
+#include "mpc_controller/visualization.hpp"
 
-class TestMPCOSQPSolver : public ::testing::Test {
+class TestMPCOSQPSolver : public ::testing::Test
+{
 protected:
-  void SetUp() override {
-    // ノードの初期化
-    node_ = std::make_shared<rclcpp::Node>("test_mpc_solver");
+  void SetUp() override
+  {
+    rclcpp::init(0, nullptr);
+    node_ = std::make_shared<rclcpp::Node>("test_mpc_osqp_solver");
     visualization_ = std::make_shared<mpc_controller::Visualization>(node_);
 
-    // MPCソルバーのパラメータ設定
+    // MPCのパラメータ設定
     const int N = 10;  // 予測ホライズン
     const int nx = 3;  // 状態変数の数 (x, y, yaw)
-    const int nu = 2;  // 制御入力の数 (acceleration, steering)
+    const int nu = 2;  // 制御入力の数 (acceleration, steering_angle)
+
+    // ソルバーの初期化
+    solver_ = std::make_shared<mpc_controller::MPCOSQPSolver>(N, nx, nu);
 
     // 状態遷移行列
     Eigen::MatrixXd A = Eigen::MatrixXd::Identity(nx, nx);
@@ -47,17 +54,19 @@ protected:
     R *= 0.1;  // 制御入力の重みを小さく
 
     // 制約
-    Eigen::VectorXd x_min(nx), x_max(nx);
-    x_min << -100, -100, -M_PI;
-    x_max << 100, 100, M_PI;
-
     Eigen::VectorXd u_min(nu), u_max(nu);
     u_min << -3.0, -0.5;  // 加速度制限: -3.0 m/s², ステアリング制限: -0.5 rad
     u_max << 3.0, 0.5;    // 加速度制限: 3.0 m/s², ステアリング制限: 0.5 rad
 
-    // ソルバーの初期化
-    solver_ = std::make_shared<mpc_controller::MPCOSQPSolver>(
-      N, nx, nu, A, B, Q, R, x_min, x_max, u_min, u_max);
+    // パラメータの設定
+    solver_->setModel(A, B);
+    solver_->setWeight(Q, R);
+    solver_->setConstraint(u_min, u_max);
+  }
+
+  void TearDown() override
+  {
+    rclcpp::shutdown();
   }
 
   std::shared_ptr<rclcpp::Node> node_;
@@ -69,20 +78,22 @@ protected:
 TEST_F(TestMPCOSQPSolver, TrackReferenceTest) {
   // 現在の状態
   std::vector<double> current_state = {0.0, 0.0, 0.0};  // x, y, yaw
+  Eigen::VectorXd x0 = Eigen::Map<Eigen::VectorXd>(current_state.data(), current_state.size());
 
   // 参照軌道（直線）
-  std::vector<std::vector<double>> reference_trajectory;
+  std::vector<Eigen::VectorXd> reference_trajectory;
   for (int i = 0; i < 100; ++i) {
-    reference_trajectory.push_back({i * 0.1, 0.0, 0.0});  // x, y, yaw
+    std::vector<double> ref = {i * 0.1, 0.0, 0.0};  // x, y, yaw
+    reference_trajectory.push_back(Eigen::Map<Eigen::VectorXd>(ref.data(), ref.size()));
   }
 
-  // 10秒間のシミュレーション
+  // 30秒間のシミュレーション
   const double dt = 0.1;  // 制御周期
-  const int sim_steps = 100;  // 10秒 / 0.1秒 = 100ステップ
+  const int sim_steps = 300;  // 30秒 / 0.1秒 = 300ステップ
 
   for (int step = 0; step < sim_steps; ++step) {
     // MPCソルバーで制御入力を計算
-    std::vector<double> control_inputs = solver_->solve(current_state, reference_trajectory);
+    Eigen::VectorXd control_inputs = solver_->solve(x0, reference_trajectory);
 
     // 予測軌跡を計算（簡易的な実装）
     std::vector<double> predicted_x, predicted_y, predicted_yaw;
@@ -113,6 +124,7 @@ TEST_F(TestMPCOSQPSolver, TrackReferenceTest) {
     current_state[0] += v * std::cos(current_state[2]) * dt;
     current_state[1] += v * std::sin(current_state[2]) * dt;
     current_state[2] += control_inputs[1] * dt;
+    x0 = Eigen::Map<Eigen::VectorXd>(current_state.data(), current_state.size());
 
     // 制御周期分待機
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -123,26 +135,28 @@ TEST_F(TestMPCOSQPSolver, TrackReferenceTest) {
 TEST_F(TestMPCOSQPSolver, TurnTest) {
   // 現在の状態
   std::vector<double> current_state = {0.0, 0.0, 0.0};  // x, y, yaw
+  Eigen::VectorXd x0 = Eigen::Map<Eigen::VectorXd>(current_state.data(), current_state.size());
 
   // 参照軌道（右ターン）
-  std::vector<std::vector<double>> reference_trajectory;
+  std::vector<Eigen::VectorXd> reference_trajectory;
   const double radius = 10.0;
   for (int i = 0; i < 100; ++i) {
     double angle = i * 0.1;
-    reference_trajectory.push_back({
+    std::vector<double> ref = {
       radius * (1.0 - std::cos(angle)),  // x
       radius * std::sin(angle),          // y
       angle                              // yaw
-    });
+    };
+    reference_trajectory.push_back(Eigen::Map<Eigen::VectorXd>(ref.data(), ref.size()));
   }
 
-  // 10秒間のシミュレーション
+  // 30秒間のシミュレーション
   const double dt = 0.1;  // 制御周期
-  const int sim_steps = 100;  // 10秒 / 0.1秒 = 100ステップ
+  const int sim_steps = 300;  // 30秒 / 0.1秒 = 300ステップ
 
   for (int step = 0; step < sim_steps; ++step) {
     // MPCソルバーで制御入力を計算
-    std::vector<double> control_inputs = solver_->solve(current_state, reference_trajectory);
+    Eigen::VectorXd control_inputs = solver_->solve(x0, reference_trajectory);
 
     // 予測軌跡を計算（簡易的な実装）
     std::vector<double> predicted_x, predicted_y, predicted_yaw;
@@ -173,14 +187,15 @@ TEST_F(TestMPCOSQPSolver, TurnTest) {
     current_state[0] += v * std::cos(current_state[2]) * dt;
     current_state[1] += v * std::sin(current_state[2]) * dt;
     current_state[2] += control_inputs[1] * dt;
+    x0 = Eigen::Map<Eigen::VectorXd>(current_state.data(), current_state.size());
 
     // 制御周期分待機
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
 }
 
-int main(int argc, char** argv) {
-  rclcpp::init(argc, argv);
+int main(int argc, char** argv)
+{
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 } 
