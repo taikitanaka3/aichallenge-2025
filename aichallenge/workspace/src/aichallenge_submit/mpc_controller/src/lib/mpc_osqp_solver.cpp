@@ -13,6 +13,7 @@
 
 #include "mpc_controller/mpc_osqp_solver.hpp"
 #include <iostream>
+#include <cstdlib>
 
 namespace mpc_controller {
 
@@ -39,11 +40,11 @@ void MPCOSQPSolver::setConstraint(const Eigen::VectorXd& u_min, const Eigen::Vec
 void MPCOSQPSolver::cleanup() {
   if (work_) osqp_cleanup(work_);
   if (data_) {
-    if (data_->A) c_free(data_->A);
-    if (data_->P) c_free(data_->P);
-    c_free(data_);
+    if (data_->A) free(data_->A);
+    if (data_->P) free(data_->P);
+    free(data_);
   }
-  if (settings_) c_free(settings_);
+  if (settings_) free(settings_);
   work_ = nullptr;
   data_ = nullptr;
   settings_ = nullptr;

@@ -18,7 +18,7 @@
 #include <vector>
 
 // OSQP C API
-#include <osqp.h>
+#include </opt/ros/humble/include/osqp/osqp.h>
 
 namespace mpc_controller {
 

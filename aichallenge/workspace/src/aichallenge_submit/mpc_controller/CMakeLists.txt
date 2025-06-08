@@ -18,18 +18,23 @@ find_package(osqp_vendor REQUIRED)
 include_directories(
   include
   ${EIGEN3_INCLUDE_DIR}
+  ${osqp_vendor_INCLUDE_DIRS}
+  SYSTEM /opt/ros/humble/include
 )
 
 # ライブラリの作成（vehicle_modelのみ）
 add_library(mpc_controller_lib
-  src/lib/vehicle_model.cpp
   src/lib/mpc_osqp_solver.cpp
+  src/lib/vehicle_model.cpp
+  src/lib/visualization.cpp
 )
 ament_target_dependencies(mpc_controller_lib
   rclcpp
   autoware_auto_planning_msgs
   nav_msgs
   autoware_auto_control_msgs
+  visualization_msgs
+  tf2_geometry_msgs
   osqp_vendor
 )
 
@@ -77,6 +82,10 @@ if(BUILD_TESTING)
   )
   target_link_libraries(test_mpc_osqp_solver
     mpc_controller_lib
+    rclcpp
+    visualization_msgs
+    tf2_geometry_msgs
+    osqp_vendor
   )
 endif()
 

@@ -20,6 +20,7 @@
 #include <nav_msgs/msg/odometry.hpp>
 #include <autoware_auto_control_msgs/msg/ackermann_control_command.hpp>
 #include "mpc_controller/vehicle_model.hpp"
+#include <visualization_msgs/msg/marker_array.hpp>
 
 namespace mpc_controller
 {
@@ -40,6 +41,7 @@ private:
 
   // パブリッシャー
   rclcpp::Publisher<autoware_auto_control_msgs::msg::AckermannControlCommand>::SharedPtr control_cmd_pub_;
+  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_pub_;
 
   // 車両モデル
   std::unique_ptr<LinearVehicleModel> vehicle_model_;
@@ -47,6 +49,16 @@ private:
   // 最新のメッセージ
   autoware_auto_planning_msgs::msg::Trajectory::SharedPtr current_trajectory_;
   nav_msgs::msg::Odometry::SharedPtr current_odometry_;
+
+  void publishVisualization(
+    const std::vector<double>& predicted_x,
+    const std::vector<double>& predicted_y,
+    const std::vector<double>& predicted_yaw,
+    const double current_x,
+    const double current_y,
+    const double current_yaw,
+    const double acceleration,
+    const double steering_angle);
 };
 
 }  // namespace mpc_controller
