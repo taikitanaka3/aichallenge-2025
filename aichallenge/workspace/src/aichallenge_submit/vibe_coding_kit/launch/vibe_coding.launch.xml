@@ -1,0 +1,4 @@
+<!-- usage : <include file="$(find-pkg-share vibe_coding_kit)/launch/vibe_coding.launch.xml" /> -->
+<launch>
+  <node pkg="vibe_coding_kit" exec="vibe_coding_node.py" name="vibe_coding_kit" output="screen"/>
+</launch> 

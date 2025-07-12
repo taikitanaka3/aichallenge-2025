@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>vibe_coding_kit</name>
+  <version>0.0.1</version>
+  <description>Vibe coding kit for camera-based control</description>
+  <maintainer email="tanaka3docomo@gmail.com">tanaka3</maintainer>
+  <license>The MIT License (MIT)</license>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>autoware_auto_control_msgs</exec_depend>
+  <exec_depend>autoware_auto_perception_msgs</exec_depend>
+  <exec_depend>autoware_auto_planning_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>cv_bridge</exec_depend>
+  <exec_depend>python3-opencv</exec_depend>
+  <buildtool_depend>ament_cmake_auto</buildtool_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
