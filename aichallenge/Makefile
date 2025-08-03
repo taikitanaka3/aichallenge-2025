@@ -1,17 +1,16 @@
 # make file inspired by https://roborovsky-racers.github.io/RoborovskyNote/
-sim:
+sim: AWSIM
 	@sudo ip link set multicast on lo
 	@sudo sysctl -w net.core.rmem_max=2147483647 >/dev/null
 	@echo "Start AWSIM"
-	@${AWSIM_PATH}/AWSIM.x86_64 --timeout 86400.0 &
+	@/aichallenge/simulator/AWSIM/AWSIM.x86_64 --timeout 86400.0 &
 
 aw:
 	@echo "Start Auwoware"
-	@bash run_autoware.bash
+	@bash run_autoware.bash awsim
 
-mpc: start
-	@echo "Start MPC"
-	@ros2 launch multi_purpose_mpc_ros mpc_controller.launch.py
+init:
+	@./publish_initialpose.py
 
 start:
 	@echo "Start control"
@@ -20,7 +19,7 @@ start:
 reset:
 	@echo "Reset simulation"
 	@ros2 topic pub --once /aichallenge/awsim/reset std_msgs/msg/Empty {} >/dev/null &
-	@ros2 run multi_purpose_mpc_ros publish_initialpose
+	@./publish_initialpose.py
 
 
 setup: sim aw

@@ -125,7 +125,7 @@
     </group>
   </group>
 
-  <arg name="use_pure_pursuit" default="true"/>
+  <arg name="use_pure_pursuit" default="false"/>
   <!-- Pure Pursuit -->
   <group if="$(var use_pure_pursuit)">
     <let name="steering_tire_angle_gain_var" value="1.639" if="$(var simulation)"/>
