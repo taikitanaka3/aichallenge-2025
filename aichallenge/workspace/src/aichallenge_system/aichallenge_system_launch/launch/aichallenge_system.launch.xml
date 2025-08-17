@@ -42,9 +42,9 @@
     </group>
 
     <!-- Adapters for real vehicle. -->
-    <group unless="$(var simulation)">
+    <!-- <group unless="$(var simulation)">
         <include file="$(find-pkg-share aichallenge_system_launch)/launch/mode/real.launch.xml"/>
-    </group>
+    </group> -->
 
     <!-- System monitor. -->
     <group>
