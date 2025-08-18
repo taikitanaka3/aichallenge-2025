@@ -44,7 +44,7 @@ services:
   driver:
     tty: true
     stdin_open: true
-    image: "racing_kart_interface"
+    image: "ghcr.io/tier4/racing_kart_interface"
     container_name: "racing_kart_interface"
     stop_grace_period: 0.1s
     privileged: true

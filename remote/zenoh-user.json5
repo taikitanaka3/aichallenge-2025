@@ -57,14 +57,6 @@
           "/initialpose",
           "/racing_kart/joy"
         ],
-        subscribers: [
-          "/localization/kinematic_state",
-          "/vehicle/.*",
-          "/control/.*",
-          "/sensing/gnss/nav_sat_fix",
-          "/sensing/imu/imu_raw",
-          "/sensing/vehicle_velocity_converter/twist_with_covariance"
-        ],
         service_servers: [".*"],
         service_clients: [".*"],
         action_servers: [],
