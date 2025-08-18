@@ -53,8 +53,18 @@
       ////               Use 'deny' to allow all except the specified interfaces. If an interface type is set to an empty list
       ////               or is not specified at all, it means that ALL such interface are allowed.
       allow: {
-        publishers: [".*"],
-        subscribers: ["/racing_kart/joy", "/initialpose"],
+        publishers: [
+          "/localization/kinematic_state",
+          "/vehicle/.*",
+          "/control/.*",
+          "/sensing/gnss/nav_sat_fix",
+          "/sensing/imu/imu_raw",
+          "/sensing/vehicle_velocity_converter/twist_with_covariance"
+        ],
+        subscribers: [
+          "/racing_kart/joy",
+          "/initialpose"
+        ],
         service_servers: [".*"],
         service_clients: [".*"],
         action_servers: [],
@@ -170,7 +180,7 @@
   ////
   //// mode: The bridge's mode (router, peer or client)
   ////
-  //mode: "router",
+  mode: "router",
 
   ////
   //// Which endpoints to connect to. E.g. tcp/localhost:7447.
