@@ -11,7 +11,7 @@ driver:
 	docker compose logs -f driver
 
 # zenohの起動・ログ表示
-    tty: tru
+    tty: true
 zenoh:
 	docker compose up -d zenoh
 	docker compose logs -f zenoh
