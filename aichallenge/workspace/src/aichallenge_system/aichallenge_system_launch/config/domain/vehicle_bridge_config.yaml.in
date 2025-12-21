@@ -79,23 +79,5 @@ topics:
     remap: /sensing/camera/camera_info
     reversed: True
 
-  # V2X topics: other vehicles (AWSIM -> Autoware)
-  d1/sensing/gnss/nav_sat_fix:
-    type: sensor_msgs/msg/NavSatFix
-    remap: /v2x/gnss/nav_sat_fix
-    reversed: True
-
-  d2/sensing/gnss/nav_sat_fix:
-    type: sensor_msgs/msg/NavSatFix
-    remap: /v2x/gnss/nav_sat_fix
-    reversed: True
-
-  d3/sensing/gnss/nav_sat_fix:
-    type: sensor_msgs/msg/NavSatFix
-    remap: /v2x/gnss/nav_sat_fix
-    reversed: True
-
-  d4/sensing/gnss/nav_sat_fix:
-    type: sensor_msgs/msg/NavSatFix
-    remap: /v2x/gnss/nav_sat_fix
-    reversed: True
+  # V2X topics: GNSS from other vehicles (AWSIM -> Autoware)
+@V2X_OTHER_GNSS_TOPICS@

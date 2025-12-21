@@ -12,6 +12,18 @@ file(MAKE_DIRECTORY ${_domain_bridge_out_dir})
 set(TO_DOMAIN 0)
 foreach(FROM_DOMAIN RANGE 1 4)
   set(VEHICLE_NS d${FROM_DOMAIN})
+  set(V2X_OTHER_GNSS_TOPICS "")
+  foreach(_other_domain RANGE 1 4)
+    if(NOT _other_domain EQUAL FROM_DOMAIN)
+      string(APPEND V2X_OTHER_GNSS_TOPICS
+        "  d${_other_domain}/sensing/gnss/nav_sat_fix:\n"
+        "    type: sensor_msgs/msg/NavSatFix\n"
+        "    remap: /v2x/gnss/nav_sat_fix\n"
+        "    reversed: True\n"
+        "\n"
+      )
+    endif()
+  endforeach()
   set(_domain_bridge_out
     ${_domain_bridge_out_dir}/d${FROM_DOMAIN}_bridge_config.yaml
   )
